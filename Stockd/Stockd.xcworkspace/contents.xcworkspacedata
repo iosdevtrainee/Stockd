@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:/Users/Jevon/Desktop/Pursuit/iOS/Unit_3/Week_4/Stock-d/Stockd/Stockd/Models/UserAuthDelegate.swift">
+   </FileRef>
+   <FileRef
+      location = "group:Stockd.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Pods/Pods.xcodeproj">
+   </FileRef>
+</Workspace>

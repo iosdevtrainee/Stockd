@@ -1,0 +1,19 @@
+//
+//  EconomicsViewController.swift
+//  Stockd
+//
+//  Created by J on 1/6/19.
+//  Copyright © 2019 J. All rights reserved.
+//
+
+import UIKit
+
+class EconomicsViewController: UIViewController {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        // Do any additional setup after loading the view.
+    }
+
+}
