@@ -11,8 +11,10 @@ enum Navigation:String {
   case search =  "SearchVC"
   case stock = "StockVC"
   case watchlist = "WatchListVC"
-  case signIn = "SignInVC"
+  case userAuth = "UserAuthVC"
+  case signUp = "SignUpVC"
   case compare = "CompVC"
   case economics = "EconomicsVC"
-  
+  case tabBar = "TabBarVC"
+  case loading = "LoadingVC"
 }

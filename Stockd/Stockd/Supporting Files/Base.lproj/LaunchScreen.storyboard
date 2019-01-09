@@ -17,13 +17,40 @@
                     <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Copyright © 2019 iosdevtrainee. All rights reserved." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qkp-5n-oLq">
+                                <rect key="frame" x="0.0" y="607" width="375" height="40"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="40" id="lCK-oN-r9B"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="14"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="J7h-lU-vHR">
+                                <rect key="frame" x="0.0" y="56" width="375" height="534"/>
+                                <color key="backgroundColor" red="0.92151814699172974" green="0.60949438810348511" blue="0.61710268259048462" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="0.78493454321702727" blue="0.49224899371119024" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                        <constraints>
+                            <constraint firstItem="Qkp-5n-oLq" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="65P-zf-EHd"/>
+                            <constraint firstItem="Qkp-5n-oLq" firstAttribute="width" secondItem="Ze5-6b-2t3" secondAttribute="width" id="RH3-Zx-oFJ"/>
+                            <constraint firstItem="J7h-lU-vHR" firstAttribute="width" secondItem="Ze5-6b-2t3" secondAttribute="width" id="Vra-kH-NDt"/>
+                            <constraint firstItem="J7h-lU-vHR" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="Y1U-gC-y15"/>
+                            <constraint firstItem="J7h-lU-vHR" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" constant="-20.5" id="aSy-oA-WCX"/>
+                            <constraint firstAttribute="bottom" secondItem="Qkp-5n-oLq" secondAttribute="bottom" constant="20" symbolic="YES" id="bqg-rO-phU"/>
+                            <constraint firstItem="J7h-lU-vHR" firstAttribute="height" secondItem="Ze5-6b-2t3" secondAttribute="height" multiplier="0.8" id="i0P-lz-kfM"/>
+                        </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="53" y="375"/>
+            <point key="canvasLocation" x="52" y="374.66266866566718"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="logo" width="1280" height="720"/>
+    </resources>
 </document>

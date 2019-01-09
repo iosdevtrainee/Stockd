@@ -9,8 +9,9 @@
 import UIKit
 
 class CompanyCell: UITableViewCell {
-
-    override func awakeFromNib() {
+  @IBOutlet weak var companyNameLabel: UILabel!
+  @IBOutlet weak var companyTickerLabel: UILabel!
+  override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
     }

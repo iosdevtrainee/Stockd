@@ -13,17 +13,24 @@ final class UserAPIClient {
     let urlString = "\(Config.userAPIUrl)/login"
     guard let url = URL(string: urlString) else { return }
     var request = URLRequest(url: url)
-    request.httpMethod = "POST"
+    request.httpMethod = HTTPMethods.post.rawValue
     request.setValue("Basic \(user.encodedCredentials)", forHTTPHeaderField: Config.authorizationHeader)
+    
     let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+      
       if let data = data {
+        
         do {
+          
             let user = try JSONDecoder().decode(AuthUser.self, from: data)
           completion(nil, user)
+          
         } catch {
+          
           if let error = try? JSONDecoder().decode(APIError.self, from: data) {
             completion(AppError.userAPIError(error.reason), nil)
           }
+          
           completion(AppError.decodingError(error), nil)
         }
       }
@@ -32,23 +39,32 @@ final class UserAPIClient {
   }
   public static func createUser(userData:Data,
                                 completion: @escaping (AppError?, APIUser?) -> Void){
+    
     let urlString = "\(Config.userAPIUrl)/users"
     guard let url = URL(string: urlString) else { return }
     var request = URLRequest(url: url)
-    request.httpMethod = "POST"
+    request.httpMethod = HTTPMethods.post.rawValue
     request.httpBody = userData
+    
     let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+      
       if let error = error {
         completion(AppError.networkError(error), nil)
       }
+      
       if let data = data {
+        
         do {
+          
           let user = try JSONDecoder().decode(APIUser.self, from: data)
           completion(nil, user)
+          
         } catch {
+          
           if let error = try? JSONDecoder().decode(APIError.self, from: data) {
               completion(AppError.userAPIError(error.reason), nil)
           }
+          
           completion(AppError.decodingError(error), nil)
         }
       }
@@ -58,25 +74,34 @@ final class UserAPIClient {
   public static func addStockToWatchList(user:AuthUser,
                                          stockData:Data,
                                          completion:@escaping(AppError?,Stock?) -> Void){
+    
     let urlString = "\(Config.userAPIUrl)/addstock"
     guard let url = URL(string: urlString) else { return }
     var request = URLRequest(url: url)
-    request.httpMethod = "POST"
+    request.httpMethod = HTTPMethods.post.rawValue
     let bearerAuthValue = "Bearer \(user.token)"
     request.addValue(bearerAuthValue, forHTTPHeaderField: Config.authorizationHeader)
     request.httpBody = stockData
+    
     let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+      
       if let error = error {
         completion(AppError.networkError(error), nil)
       }
+      
       if let data = data {
+        
         do {
+          
           let stock = try JSONDecoder().decode(Stock.self, from: data)
           completion(nil, stock)
+          
         } catch {
+          
           if let error = try? JSONDecoder().decode(APIError.self, from: data) {
             completion(AppError.userAPIError(error.reason), nil)
           }
+          
           completion(AppError.decodingError(error), nil)
         }
       }
@@ -84,28 +109,60 @@ final class UserAPIClient {
     task.resume()
   }
   public static func getWatchlist(user:AuthUser,completion:@escaping(AppError?, [Stock]?) -> Void){
+    
     let urlString = "\(Config.userAPIUrl)/watchlist"
     guard let url = URL(string: urlString) else { return }
     var request = URLRequest(url: url)
-    request.httpMethod = "GET"
+    request.httpMethod = HTTPMethods.get.rawValue
     let bearerAuthValue = "Bearer \(user.token)"
     request.addValue(bearerAuthValue, forHTTPHeaderField: Config.authorizationHeader)
+    
     let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+      
       if let error = error {
         completion(AppError.networkError(error), nil)
       }
+      
       if let data = data {
+        
         do {
+          
           let stocks = try JSONDecoder().decode([Stock].self, from: data)
           completion(nil, stocks)
+          
         } catch {
+          
           if let error = try? JSONDecoder().decode(APIError.self, from: data) {
             completion(AppError.userAPIError(error.reason), nil)
           }
+          
           completion(AppError.decodingError(error), nil)
         }
       }
     }
     task.resume()
+  }
+  public static func deleteStock(user:AuthUser, stock:Stock, completion:@escaping (AppError?, Bool) -> Void){
+    
+    guard let id = stock.id else { return }
+    let urlString = "\(Config.userAPIUrl)/deletestock/\(id)"
+    guard let url = URL(string: urlString) else { return }
+    var request = URLRequest(url: url)
+    request.httpMethod = HTTPMethods.delete.rawValue
+    let bearerAuthValue = "Bearer \(user.token)"
+    request.setValue(bearerAuthValue, forHTTPHeaderField: Config.authorizationHeader)
+    
+    URLSession.shared.dataTask(with: request) { (data, response, error) in
+      
+      if let error = error {
+        completion(AppError.networkError(error), false)
+      }
+      
+      if let response = response as? HTTPURLResponse {
+        if response.statusCode == 259 {
+          completion(nil, true)
+        }
+      }
+    }
   }
 }

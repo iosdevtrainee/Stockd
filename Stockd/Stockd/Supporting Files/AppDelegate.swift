@@ -9,6 +9,7 @@
 import UIKit
 import FacebookCore
 import GoogleSignIn
+import UserNotifications
 var userLoggedIn = false {
   didSet {
     UserDefaults.standard.set(userLoggedIn, forKey:Config.userDefaultLoginKey)
@@ -41,12 +42,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                                              annotation: options[UIApplication.OpenURLOptionsKey.annotation])
   }
   
+  func registerForRichNotifications() {
+    
+    UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.badge,.sound]) { (granted, error) in
+      if let error = error {
+        print(error.localizedDescription)
+      }
+      UserDefaults.standard.set(granted,forKey: Config.userDefaultsNotificationsKey)
+    }
+    
+    let action1 = UNNotificationAction(identifier: "stockAction", title: "Stock Action", options: [.foreground])
+    
+    let category = UNNotificationCategory(identifier: "actionCategory", actions: [action1], intentIdentifiers: [], options: [])
+    
+    UNUserNotificationCenter.current().setNotificationCategories([category])
+    
+  }
+  
   private func fBOpenURLAcess(_ url:URL,options: [UIApplication.OpenURLOptionsKey : Any],app: UIApplication) -> Bool {
     return SDKApplicationDelegate.shared.application(app, open: url, options: options)
   }
   
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     // Override point for customization after application launch.
+    registerForRichNotifications()
     let storyboard = UIStoryboard(name: Config.storyboardName, bundle: nil)
     userLoggedIn = UserDefaults.standard.bool(forKey: Config.userDefaultLoginKey)
     if userLoggedIn {
@@ -54,8 +73,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       transitionToVC(viewController: tabBarVC)
       return true
     }
-    guard let signInVC = storyboard.instantiateViewController(withIdentifier: Config.signInVCName) as?
-      SignInViewController else { return true }
+    guard let signInVC = storyboard.instantiateViewController(withIdentifier: Config.userAuthVC) as?
+      UserAuthController else { return true }
     googleUserDelegate = signInVC
     setupGoogleSignAPI()
     setupFBSignAPI(application, launchOptions)
@@ -103,28 +122,53 @@ extension AppDelegate : GIDSignInDelegate {
   func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!,
             withError error: Error!) {
     if let error = error {
-      UIAlertController.errorAlert(error: AppError.invalidLogin(error.localizedDescription))
+      let alert = UIAlertController.errorAlert(error: AppError.invalidLogin(error.localizedDescription))
+      transitionToVC(viewController: alert)
     } else {
-      // Perform any operations on signed in user here.
-      guard let _ = user.userID,                  // For client-side use only!
-      let idToken = user.authentication.idToken, // Safe to send to the server
-      let _ = user.profile.name,
-      let _ = user.profile.givenName,
-      let _ = user.profile.familyName,
+      guard let clientID = user.userID,                  // For client-side use only!
+        let idToken = user.authentication.idToken, // Safe to send to the server
+        let _ = user.profile.name,
+        let _ = user.profile.givenName,
+        let _ = user.profile.familyName,
         let email = user.profile.email  else { return }
-      let storyboard = UIStoryboard(name: Config.storyboardName, bundle: nil)
-      let tabBarVC = storyboard.instantiateViewController(withIdentifier: Config.tabBarVCName)
-      transitionToVC(viewController: tabBarVC)
       // TODO: Create
-      let password = idToken
+      let password = idToken + clientID
       let newUser = User.init(email: email, password: password, verifyPassword: password, token: nil)
-      
-      googleUserDelegate?.signIn(user: newUser) { success in
+      googleUserDelegate?.signUp(user: newUser, completion: { (success) in
         if success {
-          
+          googleUserDelegate?.signIn(user: newUser) { success in
+            if success {
+              let storyboard = UIStoryboard(name: Config.storyboardName, bundle: nil)
+              let tabBarVC = storyboard.instantiateViewController(withIdentifier: Config.tabBarVCName)
+              transitionToVC(viewController: tabBarVC)
+            }
+          }
         }
-      }
+      })
     }
   }
 }
 
+extension AppDelegate: UNUserNotificationCenterDelegate {
+  
+  func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+    print(response.notification.request.content.userInfo)
+    switch response.actionIdentifier {
+    case Config.notificationID:
+      let storyboard = UIStoryboard(name: Config.storyboardName, bundle: nil)
+      let tabBarVC = storyboard.instantiateViewController(withIdentifier: Config.tabBarVCName)
+      transitionToVC(viewController: tabBarVC)
+    case "stockAction":
+      let storyboard = UIStoryboard(name: Config.storyboardName, bundle: nil)
+      let tabBarVC = storyboard.instantiateViewController(withIdentifier: Config.tabBarVCName)
+      transitionToVC(viewController: tabBarVC)
+    default:
+      break
+    }
+    completionHandler()
+  }
+  
+  func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+    completionHandler([.alert, .badge, .sound])
+  }
+}

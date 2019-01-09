@@ -1,5 +1,5 @@
 //
-//  SignInViewController.swift
+//  UserAuthController.swift
 //  Stockd
 //
 //  Created by J on 12/29/18.
@@ -10,44 +10,32 @@ import UIKit
 import FacebookCore
 import FacebookLogin
 import GoogleSignIn
-class SignInViewController: UIViewController {
-  @IBOutlet weak var confirmationView: UIStackView!
-  @IBOutlet weak var verifyPasswordField: UITextField!
+class UserAuthController: UIViewController {
   @IBOutlet weak var passwordField: UITextField!
   @IBOutlet weak var usernameField: UITextField!
-  @IBOutlet weak var registrationButton: UIButton!
   @IBOutlet weak var signInButton: UIButton!
-  
   @IBOutlet weak var googleButton: GIDSignInButton!
-  @IBOutlet weak var signOutButton: UIButton!
-  @IBOutlet weak var disconnectButton: UIButton!
+//  @IBOutlet weak var disconnectButton: UIButton!
+  
   override func viewDidLoad() {
-    title = "test"
     super.viewDidLoad()
     let loginButton = LoginButton(readPermissions: [.publicProfile, .adsRead,
                                                     .email, .pagesManageCta,
                                                     .readAudienceNetworkInsights])
-    loginButton.frame = signInButton.frame
-//    loginButton.center = view.center
-    loginButton.center.x = view.frame.minX + (view.frame.maxX / 2) * 0.5
-    loginButton.center.y = view.frame.maxY / 2
-//    signInButton.transform.scaledBy(x: 1.1, y: 1.1)
-    signInButton.center.x = view.frame.maxX * 0.8
-    signInButton.center.y = view.frame.maxY / 2
-
-    
-    
+    setupViewableButtons(loginButton)
     view.addSubview(loginButton)
     loginButton.delegate = self
     GIDSignIn.sharedInstance().uiDelegate = self
-    NotificationCenter.default.addObserver(self,
-                                           selector: #selector(receiveToggleAuthUINotification(_:)),
-                                           name: NSNotification.Name(rawValue: "ToggleAuthUINotification"),
-                                           object: nil)
+    
+//    NotificationCenter.default.addObserver(self,
+//                                           selector: #selector(receiveToggleAuthUINotification(_:)),
+//                                           name: NSNotification.Name(rawValue: "ToggleAuthUINotification"),
+//                                           object: nil)
 //    toggleAuthUI()
   }
   
-  private func userSignUp(user:User) {
+  @discardableResult
+  private func userSignUp(user:User) -> Bool{
     do {
       let data = try JSONEncoder().encode(user)
       UserAPIClient.createUser(userData:data) { (error, authUser) in
@@ -56,36 +44,26 @@ class SignInViewController: UIViewController {
         }
         self.signIn(user: user)
       }
-      
     } catch {
       Lib.presentErrorController(error:AppError.encodingError(error), target: self)
+      return false
     }
+    return true
   }
   
-  private func updateViews(message:String){
-    title = message
+  private func setupViewableButtons(_ loginButton: LoginButton) {
+    loginButton.center = view.center
+    googleButton.frame = loginButton.frame
+    loginButton.center.x = view.frame.minX + (view.frame.maxX / 2) * 0.5
+    loginButton.center.y = view.frame.maxY / 2
+    googleButton.center.x = view.frame.maxX * 0.8
+    googleButton.center.y = view.frame.maxY / 2
+    loginButton.frame = CGRect(x: loginButton.frame.minX,
+                               y: googleButton.frame.minY,
+                               width: loginButton.frame.width,
+                               height: loginButton.frame.height * 1.35)
+    loginButton.center.y = googleButton.center.y
   }
-  
-  @IBAction func showSignIn(_ sender: UIBarButtonItem) {
-    if !confirmationView.isHidden {
-      confirmationView.isHidden = true
-    }
-    registrationButton.isHidden = true
-    signInButton.isHidden = false
-    updateViews(message: "Sign In")
-  }
-  
-  @IBAction func showSignUp(_ sender: Any) {
-    if confirmationView.isHidden {
-      confirmationView.isHidden = false
-    }
-    updateViews(message: "Sign Up")
-    signInButton.isHidden = true
-    registrationButton.isHidden = false
-  }
-  
-  
-  
   
   private func signIn(user:User){
     UserAPIClient.authenticateUser(user: user) { (error, authUser) in
@@ -103,9 +81,13 @@ class SignInViewController: UIViewController {
       }
       if let error = error {
         Lib.presentErrorController(error:AppError.encodingError(error), target: self)
-
       }
     }
+  }
+  
+  
+  @IBAction func transitionToSignUpVC(_ sender: UIBarButtonItem) {
+    Lib.transitionToVC(nextVCType: .signUp, vcData: nil, target: self)
   }
   
   
@@ -119,21 +101,21 @@ class SignInViewController: UIViewController {
     signIn(user: user)
   }
   
-  @IBAction func didTapDisconnect(_ sender: AnyObject) {
-    GIDSignIn.sharedInstance().disconnect()
-  }
+//  @IBAction func didTapDisconnect(_ sender: AnyObject) {
+//    GIDSignIn.sharedInstance().disconnect()
+//  }
 
-  func toggleAuthUI() {
-    if GIDSignIn.sharedInstance().hasAuthInKeychain() {
-      signInButton.isHidden = true
-      signOutButton.isHidden = false
-      disconnectButton.isHidden = false
-    } else {
-      signInButton.isHidden = false
-      signOutButton.isHidden = true
-      disconnectButton.isHidden = true
-    }
-  }
+//  func toggleAuthUI() {
+//    if GIDSignIn.sharedInstance().hasAuthInKeychain() {
+//      signInButton.isHidden = true
+//      signOutButton.isHidden = false
+//      disconnectButton.isHidden = false
+//    } else {
+//      signInButton.isHidden = false
+//      signOutButton.isHidden = true
+//      disconnectButton.isHidden = true
+//    }
+//  }
   
   override var preferredStatusBarStyle: UIStatusBarStyle {
     return UIStatusBarStyle.lightContent
@@ -145,27 +127,23 @@ class SignInViewController: UIViewController {
                                               object: nil)
   }
   
-  @objc func receiveToggleAuthUINotification(_ notification: NSNotification) {
-    if notification.name.rawValue == "ToggleAuthUINotification" {
-      self.toggleAuthUI()
-    }
-  }
-  
-  
+//  @objc func receiveToggleAuthUINotification(_ notification: NSNotification) {
+//    if notification.name.rawValue == "ToggleAuthUINotification" {
+//      self.toggleAuthUI()
+//    }
+//  }
   
 }
-extension SignInViewController: LoginButtonDelegate {
+//TODO: Make a Local Account for Facebook users
+extension UserAuthController: LoginButtonDelegate {
   func loginButtonDidCompleteLogin(_ loginButton: LoginButton, result: LoginResult) {
     switch result {
     case .failed(let error):
       print(error)
     case .cancelled:
       print("User cancelled login.")
-    case .success/*(let grantedPermissions, let declinedPermissions, let accessToken)*/:
-      let storyboard = UIStoryboard(name: Config.storyboardName, bundle: nil)
-      let searchVC = storyboard
-        .instantiateViewController(withIdentifier: Config.tabBarVCName)
-      self.present(searchVC, animated: true) { userLoggedIn = true}
+    case .success(let grantedPermissions, let declinedPermissions, let accessToken):
+      break
     }
   }
   
@@ -174,19 +152,23 @@ extension SignInViewController: LoginButtonDelegate {
   }
 }
 
-extension SignInViewController: GIDSignInUIDelegate {
+extension UserAuthController: GIDSignInUIDelegate {
   
 }
 
-extension SignInViewController: UserAuthDelegate {
+extension UserAuthController: UserAuthDelegate {
   func signOut(completion: (Bool) -> Void) {
     UserDefaults.standard.removeObject(forKey: Config.userDefaultsTokenExp)
     UserDefaults.standard.removeObject(forKey: Config.userDefaultsTokenKey)
     userLoggedIn = false
-    Lib.transitionToVC(nextVCType: .signIn, vcData: nil, target: self)
+    Lib.transitionToVC(nextVCType: .userAuth, vcData: nil, target: self)
   }
   func signIn(user: User, completion: (Bool) -> Void) {
     signIn(user: user)
     completion(true)
+  }
+  func signUp(user: User, completion:(Bool) -> Void){
+    let success = userSignUp(user: user)
+    completion(success)
   }
 }

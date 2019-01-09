@@ -23,7 +23,7 @@ struct User: Codable {
 }
 
 struct AuthUser: Codable {
-  public var token: String
+  public let token: String
   public let tokenExpiry: String
 }
 

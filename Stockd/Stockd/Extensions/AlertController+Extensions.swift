@@ -9,6 +9,7 @@
 import UIKit
 
 extension UIAlertController {
+//  @discardableResult
   static func errorAlert(error:ErrorProtocol) -> UIAlertController {
     let alert = UIAlertController(title: "Error", message: error.errorMessage, preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))

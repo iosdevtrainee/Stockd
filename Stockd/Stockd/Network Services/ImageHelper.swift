@@ -25,7 +25,7 @@ final class ImageHelper {
       }
     }
   }
-  // NSCache - a dictionary that has the ability to chace transient data for
+  // NSCache - a dictionary that has the ability to cache transient data for
   // performance improvements
   // We'll use a singleton to build a wrapper around NSCache
 }

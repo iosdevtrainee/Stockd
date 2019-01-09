@@ -10,7 +10,7 @@ import UIKit
 import Charts
 import SafariServices
 class StockViewController: UIViewController {
-  
+  @IBOutlet weak var navTitleLabel: UINavigationItem!
   @IBOutlet weak var assetNewsTable: UITableView!
   @IBOutlet weak var stockChart: LineChartView!
   public var company: Company?
@@ -24,7 +24,7 @@ class StockViewController: UIViewController {
   private var assetPrices = [CompanyPrice]() {
     didSet {
       DispatchQueue.main.async {
-          self.renderChart(prices: self.assetPrices.map { $0.close })
+          self.renderChart(prices: self.assetPrices)
       }
     }
   }
@@ -37,6 +37,7 @@ class StockViewController: UIViewController {
       navigationItem.title = ticker
       getNews(ticker: ticker)
       getPrices(ticker: ticker)
+      navTitleLabel.title = ticker
       
         // Do any additional setup after loading the view.
     }
@@ -65,10 +66,10 @@ class StockViewController: UIViewController {
     }
   }
   
-  private func renderChart(prices:[Double]){
+  private func renderChart(prices:[CompanyPrice]){
     var chartValues = [ChartDataEntry]()
     chartValues = prices.indices.map {(index) in
-      ChartDataEntry(x: Double(index), y: prices[index])
+      ChartDataEntry(x: Double(index), y: prices[index].close)
     }
     let lineSeries = LineChartDataSet(values: chartValues, label: "Stock Prices")
     //    lineSeries.colors = [.black]
@@ -83,6 +84,8 @@ class StockViewController: UIViewController {
     stockChart.data = lineChartData
     stockChart.drawGridBackgroundEnabled = false
     stockChart.chartDescription?.text = Config.chartText
+    let xAxis = stockChart.xAxis
+    xAxis.valueFormatter = DateValueFormatter()
   }
   
   @IBAction func onBackPressed(_ sender: UIBarButtonItem) {
@@ -114,7 +117,6 @@ class StockViewController: UIViewController {
 extension StockViewController : UITableViewDelegate {
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     let story = news[indexPath.row]
-    let url = URL(fileURLWithPath: "https://google.com")
     let safariVC = SFSafariViewController(url: story.url)
     present(safariVC, animated: true, completion: nil)
   }

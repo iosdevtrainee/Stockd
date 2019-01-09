@@ -8,8 +8,8 @@
 
 import UIKit
 import Lottie
-class ViewController: UIViewController {
-  private var nextController: UIViewController?
+class LoadingViewController: UIViewController {
+  public var nextController: UIViewController?
   override func viewDidLoad() {
     super.viewDidLoad()
     // Do any additional setup after loading the view, typically from a nib.
@@ -17,7 +17,7 @@ class ViewController: UIViewController {
     self.view.addSubview(lottieView)
     lottieView.play()
     if let nextVC = nextController {
-      transition(timeToTransition: 3, viewController: nextVC)
+      transition(timeToTransition: 5, viewController: nextVC)
     }
   }
   private func transition(timeToTransition:Double, viewController:UIViewController){
